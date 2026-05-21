@@ -1,45 +1,24 @@
-const inputSearch = document.getElementById('input-search');
-const btnSearch = document.getElementById('btn-search');
-const profileResults = document.querySelector('.profile-results');
-
-const baseUrl = 'https://api.github.com';
+import { inputSearch, btnSearch, renderProfile, renderLoading, clearResults, showAlert } from './dom.js';
+import { fetchGitHubUser } from './api.js';
 
 const handleSearch = async () => {
-    const userName = inputSearch.value;
+    const userName = inputSearch.value.trim();
 
-    if (userName) {
-        profileResults.innerHTML = '<p class="loading">Carregando...</p>';
-        try {
-            const response = await fetch(`${baseUrl}/users/${userName}`);
+    if (!userName) {
+        showAlert('Por favor, insira um nome de usuário do GitHub.');
+        clearResults();
+        return;
+    }
 
-            if (!response.ok) {
-                alert('Usuário não encontrado. Por favor, verifique o nome de usuário e tente novamente.');
-                profileResults.innerHTML = '';
-                return;
-            }
+    renderLoading();
 
-            const userData = await response.json();
-            console.log(userData);
-
-            profileResults.innerHTML = 
-            `
-                <div class="profile-card">
-                    <img src="${userData.avatar_url}" alt="${userData.login}" class="profile-image">
-                    <div class="profile-info">
-                        <h2>${userData.name}</h2>
-                        <p>${userData.bio || 'Não possui bio cadastrada.'}</p>
-                    </div>
-                </div>
-            `
-
-        } catch (error) {
-            console.error('Erro ao buscar o perfil do GitHub:', error);
-            alert('Ocorreu um erro ao buscar o perfil do GitHub. Por favor, tente novamente mais tarde.');
-            profileResults.innerHTML = '';
-        }
-    } else {
-        alert('Por favor, insira um nome de usuário do GitHub.');
-        profileResults.innerHTML = '';
+    try {
+        const userData = await fetchGitHubUser(userName);
+        renderProfile(userData);
+    } catch (error) {
+        console.error('Erro ao buscar o perfil do GitHub:', error);
+        showAlert('Usuário não encontrado. Por favor, verifique o nome de usuário e tente novamente.');
+        clearResults();
     }
 };
 
