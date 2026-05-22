@@ -9,3 +9,13 @@ export async function fetchGitHubUser(userName) {
 
     return await response.json();
 }
+
+export async function fetchUserRepositories(userName) {
+    const response = await fetch(`${BASE_URL}/users/${userName}/repos?per_page=10&sort=created`);
+
+    if (!response.ok) {
+        throw new Error('Repositórios não encontrados');
+    }
+
+    return await response.json();
+}
